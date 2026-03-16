@@ -96,6 +96,47 @@
                     <a class="nav-link" href="/dashboard">Дашборд</a>
                 </li>
             </ul>
+
+            #------------------------------------ правое меню
+            <ul class="navbar-nav ms-auto">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="nav-link text-white">{{ current_user.username }}</span>
+                </li>
+
+                {% if current_user.is_authenticated and current_user.role == 'owner' and not current_user.business_id %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.create_business') }}">Создать бизнес</a>
+                </li>
+                {% endif %}
+
+                {% if current_user.is_authenticated and current_user.role == 'owner' and current_user.business_id %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.invites') }}">Заявки</a>
+                </li>
+                {% endif %}
+
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.logout') }}">Выйти</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.login') }}">Вход</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.register') }}">Регистрация</a>
+                </li>
+                {% endif %}
+
+                {% if current_user.is_authenticated and current_user.role == 'employee' and not current_user.business_id %}
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.join_business') }}">Вступить в бизнес</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{{ url_for('auth.my_invites') }}">Мои заявки</a>
+                </li>
+                {% endif %}
+            </ul>
         </div>
     </div>
 </nav>   

@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h3>Регистрация</h3>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Имя пользователя</label>
+                        <input type="text" class="form-control" id="username" name="username" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Email</label>
+                        <input type="email" class="form-control" id="email" name="email" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Пароль</label>
+                        <input type="password" class="form-control" id="password" name="password" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Я хочу</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="role" id="role_employee" value="employee" checked>
+                            <label class="form-check-label" for="role_employee">
+                                Работать в существующем бизнесе (сотрудник)
+                            </label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="role" id="role_owner" value="owner">
+                            <label class="form-check-label" for="role_owner">
+                                Зарегистрировать свой бизнес (владелец)
+                            </label>
+                        </div>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Зарегистрироваться</button>
+                    <a href="{{ url_for('auth.login') }}" class="btn btn-link">Уже есть аккаунт?</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,41 @@
+{% extends "base.html" %}
+
+{% block title %}Заявки на вступление{% endblock %}
+
+{% block content %}
+<h1>Заявки на вступление</h1>
+
+{% if invites %}
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>Пользователь</th>
+            <th>Email</th>
+            <th>Дата заявки</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for invite in invites %}
+        <tr>
+            <td>{{ invite.user.username }}</td>
+            <td>{{ invite.user.email }}</td>
+            <td>{{ invite.created_at.strftime('%d.%m.%Y %H:%M') }}</td>
+            <td>
+                <form action="{{ url_for('auth.handle_invite', invite_id=invite.id, action='accept') }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-success">Принять</button>
+                </form>
+                <form action="{{ url_for('auth.handle_invite', invite_id=invite.id, action='reject') }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger">Отклонить</button>
+                </form>
+            </td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% else %}
+<p>Нет активных заявок</p>
+{% endif %}
+
+<a href="{{ url_for('dashboard.index') }}" class="btn btn-secondary">Назад</a>
+{% endblock %}

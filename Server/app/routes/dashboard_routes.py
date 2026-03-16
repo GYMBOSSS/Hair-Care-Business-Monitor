@@ -1,4 +1,5 @@
 from flask import render_template, Blueprint
+from flask_login import login_required, current_user
 from app import db
 from app.models.client import Client
 from app.models.service import Service
@@ -9,7 +10,14 @@ from sqlalchemy import func
 dashboard_bp = Blueprint('dashboard', __name__)
 
 @dashboard_bp.route('/dashboard')
+@login_required
 def index():
+    if not current_user.business_id:
+        if current_user.role == 'owner':
+            return render_template('dashboard/no_business_owner.html')
+        else:
+            return render_template('dashboard/no_business_employee.html')
+    
     today = datetime.now().date()
     week_ago = today - timedelta(days=7)
     month_ago = today - timedelta(days=30)

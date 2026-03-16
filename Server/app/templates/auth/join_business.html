@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Вступление в бизнес{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>Выберите бизнес</h3>
+            </div>
+            <div class="card-body">
+                <!-- Поле поиска -->
+                <div class="mb-3">
+                    <input type="text" id="searchInput" class="form-control" placeholder="Поиск по названию...">
+                </div>
+                
+                <form method="post" id="businessForm">
+                    <div class="list-group" id="businessList">
+                        {% for business in businesses %}
+                        <label class="list-group-item list-group-item-action d-flex justify-content-between align-items-center">
+                            <div>
+                                <input type="radio" name="business_id" value="{{ business.id }}" class="me-2" required>
+                                <strong>{{ business.name }}</strong>
+                                {% if business.address %}
+                                <br><small class="text-muted">{{ business.address }}</small>
+                                {% endif %}
+                            </div>
+                            <span class="badge bg-primary rounded-pill">{{ business.users|length }} сотрудников</span>
+                        </label>
+                        {% else %}
+                        <div class="list-group-item text-center text-muted">
+                            Пока нет зарегистрированных бизнесов
+                        </div>
+                        {% endfor %}
+                    </div>
+                    
+                    {% if businesses %}
+                    <button type="submit" class="btn btn-primary mt-3">Отправить заявку</button>
+                    {% endif %}
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Скрипт для поиска -->
+<script>
+document.getElementById('searchInput').addEventListener('keyup', function() {
+    let searchText = this.value.toLowerCase();
+    let items = document.querySelectorAll('#businessList .list-group-item');
+    
+    items.forEach(function(item) {
+        let text = item.textContent.toLowerCase();
+        if (text.includes(searchText)) {
+            item.style.display = 'block';
+        } else {
+            item.style.display = 'none';
+        }
+    });
+});
+</script>
+{% endblock %}
