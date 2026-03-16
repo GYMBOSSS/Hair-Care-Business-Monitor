@@ -10,5 +10,7 @@ class Service(db.Model):
     
     appointments = db.relationship('Appointment', backref='service', lazy=True)
     
+    business_id = db.Column(db.Integer, db.ForeignKey('businesses.id'), nullable=False)
+    
     def __repr__(self):
         return f'<Service {self.name}>'

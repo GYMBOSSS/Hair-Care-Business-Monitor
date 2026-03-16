@@ -28,4 +28,7 @@ def create_app():
     from app.routes import appointment_routes
     app.register_blueprint(appointment_routes.appointments_bp)
     
+    from app.routes import dashboard_routes
+    app.register_blueprint(dashboard_routes.dashboard_bp)
+    
     return app

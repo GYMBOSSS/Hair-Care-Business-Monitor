@@ -16,9 +16,9 @@ def create():
     if request.method == 'POST':
         name = request.form.get('name')
         phone = request.form.get('phone')
-        car_info = request.form.get('car_info')
+        comment = request.form.get('comment')
         
-        client = Client(name=name, phone=phone, car_info=car_info)
+        client = Client(name=name, phone=phone, comment=comment)
         db.session.add(client)
         db.session.commit()
         
@@ -40,7 +40,7 @@ def edit(id):
         
         client.name = request.form.get('name')
         client.phone = request.form.get('phone')
-        client.car_info = request.form.get('car_info')
+        client.comment = request.form.get('comment')
         
         print(f"Стало в объекте: {client.name}, {client.phone}")
         

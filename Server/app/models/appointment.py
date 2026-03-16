@@ -12,5 +12,7 @@ class Appointment(db.Model):
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    business_id = db.Column(db.Integer, db.ForeignKey('businesses.id'), nullable=False)
+    
     def __repr__(self):
         return f'<Appointment {self.id} for client {self.client_id}>'

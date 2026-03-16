@@ -17,8 +17,11 @@
     </div>
     
     <div class="mb-3">
-        <label for="car_info" class="form-label">Автомобиль</label>
-        <input type="text" class="form-control" id="car_info" name="car_info" value="{{ client.car_info if client else '' }}">
+        <label for="comment" class="form-label">Комментарий / Доп. информация</label>
+        <input type="text" class="form-control" id="comment" name="comment" 
+            value="{{ client.comment if client else '' }}" 
+            placeholder="Например: предпочтения, скидка, особые пожелания">
+        <small class="text-muted">Любая дополнительная информация о клиенте</small>
     </div>
     
     <button type="submit" class="btn btn-primary">Сохранить</button>

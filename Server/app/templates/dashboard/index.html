@@ -1,0 +1,137 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд{% endblock %}
+
+{% block content %}
+<h1 class="mb-4">Панель управления</h1>
+
+<!-- Карточки с метриками -->
+<div class="row mb-4">
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Клиенты</h5>
+                <p class="card-text display-6 mt-auto">{{ total_clients }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Услуги</h5>
+                <p class="card-text display-6 mt-auto">{{ total_services }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-info h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Записи сегодня</h5>
+                <p class="card-text display-6 mt-auto">{{ today_appointments }}</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mb-3">
+        <div class="card text-white bg-warning h-100">
+            <div class="card-body d-flex flex-column">
+                <h5 class="card-title">Выполнено сегодня</h5>
+                <p class="card-text display-6 mt-auto">{{ completed_today }}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Второй ряд карточек -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <h5 class="card-title">Выручка сегодня</h5>
+                <p class="card-text display-6">{{ revenue_today }} ₽</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-dark">
+            <div class="card-body">
+                <h5 class="card-title">Выручка за неделю</h5>
+                <p class="card-text display-6">{{ revenue_week }} ₽</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Топ услуг -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Топ услуг</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Услуга</th>
+                            <th>Количество</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for service, count in top_services %}
+                        <tr>
+                            <td>{{ service }}</td>
+                            <td>{{ count }}</td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="2">Нет данных</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Последние записи -->
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Последние записи</h5>
+            </div>
+            <div class="card-body">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Клиент</th>
+                            <th>Услуга</th>
+                            <th>Статус</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for app in recent_appointments %}
+                        <tr>
+                            <td>{{ app.client.name }}</td>
+                            <td>{{ app.service.name }}</td>
+                            <td>
+                                {% if app.status == 'completed' %}
+                                    <span class="badge bg-success">Выполнено</span>
+                                {% elif app.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Отменено</span>
+                                {% else %}
+                                    <span class="badge bg-warning">Запланировано</span>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% else %}
+                        <tr>
+                            <td colspan="3">Нет записей</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
