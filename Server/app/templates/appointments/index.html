@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+
+{% block title %}Записи{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-3">
+    <h1>Записи</h1>
+    <a href="{{ url_for('appointments.create') }}" class="btn btn-primary">+ Новая запись</a>
+</div>
+
+<div class="table-responsive">
+    <table class="table table-striped">
+        <thead>
+            <tr>
+                <th>ID</th>
+                <th>Клиент</th>
+                <th>Услуга</th>
+                <th>Дата и время</th>
+                <th>Статус</th>
+                <th>Примечания</th>
+                <th>Действия</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for appointment in appointments %}
+            <tr>
+                <td>{{ appointment.id }}</td>
+                <td>{{ appointment.client.name }}</td>
+                <td>{{ appointment.service.name }} ({{ appointment.service.price }} ₽)</td>
+                <td>{{ appointment.appointment_time.strftime('%d.%m.%Y %H:%M') }}</td>
+                <td>
+                    {% if appointment.status == 'completed' %}
+                        <span class="badge bg-success">Выполнено</span>
+                    {% elif appointment.status == 'cancelled' %}
+                        <span class="badge bg-danger">Отменено</span>
+                    {% else %}
+                        <span class="badge bg-warning">Запланировано</span>
+                    {% endif %}
+                </td>
+                <td>{{ appointment.notes or '-' }}</td>
+                <td>
+                    <a href="{{ url_for('appointments.edit', id=appointment.id) }}" class="btn btn-sm btn-warning">✏️</a>
+                    
+                    {% if appointment.status != 'completed' %}
+                    <form action="{{ url_for('appointments.complete', id=appointment.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-success">✓</button>
+                    </form>
+                    {% endif %}
+                    
+                    <form action="{{ url_for('appointments.delete', id=appointment.id) }}" method="post" style="display:inline;">
+                        <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Точно удалить?')">🗑️</button>
+                    </form>
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="7" class="text-center">Пока нет записей</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% endblock %}

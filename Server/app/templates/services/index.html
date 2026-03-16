@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Услуги{% endblock %}
+
+{% block content %}
+<div class = "d-flex justify-content-between align-items-center mb-3">
+    <h1>Услуги</h1>
+    <a href = "{{ url_for('services.create') }}" class = "btn btn-primary">
+        + Новая услуга
+    </a>
+</div>
+
+<table class="table table-striped">
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Название</th>
+            <th>Цена</th>
+            <th>Длительность (мин)</th>
+            <th>Действия</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for service in services %}
+        <tr>
+            <td>{{ service.id }}</td>
+            <td>{{ service.name }}</td>
+            <td>{{ service.price }} ₽</td>
+            <td>{{ service.duration_minutes }}</td>
+            <td>
+                <a href="{{ url_for('services.edit', id=service.id) }}" class="btn btn-sm btn-warning">✏️</a>
+                <form action="{{ url_for('services.delete', id=service.id) }}" method="post" style="display:inline;">
+                    <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Точно удалить?')">🗑️</button>
+                </form>
+            </td>
+        </tr>
+        {% else %}
+        <tr>
+            <td colspan="5" class="text-center">Пока нет услуг</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
