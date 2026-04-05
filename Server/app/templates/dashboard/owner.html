@@ -1,0 +1,118 @@
+{% extends "base.html" %}
+
+{% block title %}Дашборд владельца{% endblock %}
+
+{% block content %}
+<h1>Панель управления бизнесом</h1>
+
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary">
+            <div class="card-body">
+                <h6>Выручка сегодня</h6>
+                <h3>{{ revenue_today }} ₽</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h6>Выручка за неделю</h6>
+                <h3>{{ revenue_week }} ₽</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h6>Всего клиентов</h6>
+                <h3>{{ total_clients }}</h3>
+                <small>+{{ new_clients_week }} за неделю</small>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-secondary">
+            <div class="card-body">
+                <h6>Средний чек</h6>
+                <h3>{{ avg_check }} ₽</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Топ услуг</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                {% for service, count in top_services %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        {{ service }} <span class="badge bg-primary">{{ count }}</span>
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Динамика выручки</h5>
+            </div>
+            <div class="card-body">
+                <canvas id="revenueChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Курс валют</h5>
+            </div>
+            <div class="card-body">
+                <h4>USD: {{ usd_rate }} ₽</h4>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header">
+                <h5>Последние записи</h5>
+            </div>
+            <div class="card-body">
+                <ul class="list-group">
+                {% for app in recent_appointments %}
+                    <li class="list-group-item">
+                        {{ app.client.name }} - {{ app.service.name }} - {{ app.appointment_time.strftime('%d.%m %H:%M') }}
+                    </li>
+                {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+const ctx = document.getElementById('revenueChart').getContext('2d');
+new Chart(ctx, {
+    type: 'line',
+    data: {
+        labels: [{% for day in revenue_by_day %}'{{ day.date }}',{% endfor %}],
+        datasets: [{
+            label: 'Выручка, ₽',
+            data: [{% for day in revenue_by_day %}{{ day.revenue }},{% endfor %}],
+            borderColor: 'rgb(75, 192, 192)',
+            tension: 0.1
+        }]
+    }
+});
+</script>
+{% endblock %}

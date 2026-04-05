@@ -1,4 +1,5 @@
-from flask import render_template, request, redirect, url_for, flash, Blueprint
+from flask import render_template, request, redirect, url_for, flash, Blueprint, make_response
+from flask_login import login_required, current_user
 from app import db
 from app.models.client import Client
 from app.models.service import Service
@@ -7,18 +8,68 @@ from datetime import datetime
 
 appointments_bp = Blueprint('appointments', __name__)
 
+@appointments_bp.route('/appointments/export')
+@login_required
+def export():
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
+    appointments = Appointment.query.filter_by(
+        business_id=current_user.business_id
+    ).order_by(Appointment.appointment_time.desc()).all()
+    
+    output = []
+    output.append(['ID', 'Клиент', 'Услуга', 'Дата и время', 'Статус', 'Примечания'])
+    
+    for app in appointments:
+        output.append([
+            app.id,
+            app.client.name,
+            app.service.name,
+            app.appointment_time.strftime('%d.%m.%Y %H:%M'),
+            app.status,
+            app.notes or ''
+        ])
+    
+    import io
+    import csv
+    si = io.StringIO()
+    writer = csv.writer(si)
+    writer.writerows(output)
+    
+    response = make_response(si.getvalue())
+    response.headers['Content-Disposition'] = 'attachment; filename=appointments.csv'
+    response.headers['Content-type'] = 'text/csv; charset=utf-8'
+    
+    return response
+
 @appointments_bp.route('/appointments')
+@login_required
 def index():
-    appointments = Appointment.query.order_by(Appointment.appointment_time.desc()).all()
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
+    appointments = Appointment.query.filter_by(
+        business_id=current_user.business_id
+    ).order_by(Appointment.appointment_time.desc()).all()
+    
     return render_template('appointments/index.html', appointments=appointments)
 
 @appointments_bp.route('/appointments/new', methods = ['GET', 'POST'])
+@login_required
 def create():
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
     if request.method == 'POST':
         client_id = request.form.get('client_id')
         service_id = request.form.get('service_id')
         appointment_time_str = request.form.get('appointment_time')
         notes = request.form.get('notes')
+        business_id = current_user.business_id
         
         appointment_time = datetime.fromisoformat(appointment_time_str)
         
@@ -27,7 +78,8 @@ def create():
             service_id = service_id,
             appointment_time = appointment_time,
             notes = notes,
-            status = 'scheduled'
+            status = 'scheduled',
+            business_id = business_id
         )
         
         db.session.add(appointment)
@@ -44,7 +96,11 @@ def create():
                            services = services)
 
 @appointments_bp.route('/appointment/<int:id>/edit', methods = ['GET', 'POST'])
+@login_required
 def edit(id):
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
     appointment = Appointment.query.get_or_404(id)
     
     if request.method == 'POST':
@@ -66,18 +122,48 @@ def edit(id):
                            services = services)
 
 @appointments_bp.route('/appointments/<int:id>/delete', methods = ['POST'])
+@login_required
 def delete(id):
-    appointment = Appointment.query.get_or_404(id)
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
+    appointments = Appointment.query.filter_by(
+        business_id=current_user.business_id
+    ).order_by(Appointment.appointment_time.desc()).all()
+    
     db.session.delete(appointment)
     db.session.commit()
     flash('Запись удалена', 'success')
     return redirect(url_for('appointments.index'))
 
 @appointments_bp.route('/appointments/<int:id>/complete', methods=['POST'])
+@login_required
 def complete(id):
-    """Отметить запись как выполненную"""
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
     appointment = Appointment.query.get_or_404(id)
     appointment.status = 'completed'
     db.session.commit()
     flash('Запись отмечена как выполненная', 'success')
     return redirect(url_for('appointments.index'))
+
+@appointments_bp.route('/appointments/<int:id>/assign', methods=['POST'])
+@login_required
+def assign(id):
+    if not current_user.business_id:
+        flash('Сначала привяжитесь к бизнесу', 'warning')
+        return redirect(url_for('dashboard.index'))
+    
+    appointment = Appointment.query.filter_by(
+        id=id,
+        business_id=current_user.business_id
+    ).first_or_404()
+    
+    appointment.employee_id = current_user.id
+    db.session.commit()
+    
+    flash('Запись взята в работу', 'success')
+    return redirect(url_for('dashboard.index'))

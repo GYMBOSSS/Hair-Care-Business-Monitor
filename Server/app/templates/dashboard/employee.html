@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Мой дашборд{% endblock %}
+
+{% block content %}
+<h1>Моя панель</h1>
+
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card text-white bg-success">
+            <div class="card-body">
+                <h6>Моя выручка сегодня</h6>
+                <h3>{{ my_revenue_today }} ₽</h3>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card text-white bg-info">
+            <div class="card-body">
+                <h6>Выполнено услуг сегодня</h6>
+                <h3>{{ my_completed_today }}</h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-warning">
+                <h5>Мои задачи на сегодня</h5>
+            </div>
+            <div class="card-body">
+                {% if my_today_appointments %}
+                <ul class="list-group">
+                {% for app in my_today_appointments %}
+                    <li class="list-group-item">
+                        <strong>{{ app.appointment_time.strftime('%H:%M') }}</strong> - {{ app.client.name }} ({{ app.service.name }})
+                    </li>
+                {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Нет задач на сегодня</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="card">
+            <div class="card-header bg-info">
+                <h5>Доступные записи</h5>
+            </div>
+            <div class="card-body">
+                {% if available_appointments %}
+                <ul class="list-group">
+                {% for app in available_appointments %}
+                    <li class="list-group-item d-flex justify-content-between">
+                        <div>
+                            <strong>{{ app.appointment_time.strftime('%d.%m %H:%M') }}</strong><br>
+                            {{ app.client.name }} - {{ app.service.name }}
+                        </div>
+                        <form action="{{ url_for('appointments.assign', id=app.id) }}" method="post">
+                            <button type="submit" class="btn btn-sm btn-primary">Взять</button>
+                        </form>
+                    </li>
+                {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Нет доступных записей</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row mt-4">
+    <div class="col-md-12">
+        <div class="card">
+            <div class="card-header">
+                <h5>Мои будущие записи</h5>
+            </div>
+            <div class="card-body">
+                {% if my_upcoming %}
+                <ul class="list-group">
+                {% for app in my_upcoming %}
+                    <li class="list-group-item">
+                        {{ app.appointment_time.strftime('%d.%m.%Y %H:%M') }} - {{ app.client.name }} - {{ app.service.name }}
+                    </li>
+                {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">Нет будущих записей</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

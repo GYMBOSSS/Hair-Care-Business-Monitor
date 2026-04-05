@@ -49,15 +49,22 @@ def register():
         )
         user.set_password(password)
         
-        db.session.add(user)
-        db.session.commit()
-        
-        if role == 'employee':
-            flash('Регистрация успешна! Теперь выберите бизнес для вступления', 'success')
-            return redirect(url_for('auth.join_business'))
-        else:  # owner
+        if role == 'owner':
+            db.session.add(user)
+            db.session.commit()
+    
+            login_user(user)
+            
             flash('Регистрация успешна! Теперь создайте свой бизнес', 'success')
             return redirect(url_for('auth.create_business'))
+        else:  # employee
+            db.session.add(user)
+            db.session.commit()
+            
+            login_user(user)
+            
+            flash('Регистрация успешна! Теперь выберите бизнес для вступления', 'success')
+            return redirect(url_for('auth.join_business'))
         
     return render_template('auth/register.html')
 

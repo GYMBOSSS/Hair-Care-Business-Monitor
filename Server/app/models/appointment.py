@@ -12,6 +12,9 @@ class Appointment(db.Model):
     notes = db.Column(db.Text, nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
     
+    employee_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=True)
+    employee = db.relationship('User', foreign_keys=[employee_id], backref='appointments')
+    
     business_id = db.Column(db.Integer, db.ForeignKey('businesses.id'), nullable=False)
     
     def __repr__(self):

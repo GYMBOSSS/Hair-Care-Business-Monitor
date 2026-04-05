@@ -92,9 +92,11 @@
                 <li class="nav-item">
                     <a class="nav-link" href="/appointments">Записи</a>
                 </li>
+                {% if current_user.is_authenticated and current_user.business_id %}
                 <li class="nav-item">
                     <a class="nav-link" href="/dashboard">Дашборд</a>
                 </li>
+                {% endif %}
             </ul>
 
             #------------------------------------ правое меню
