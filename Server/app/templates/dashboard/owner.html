@@ -6,60 +6,64 @@
 <h1>Панель управления бизнесом</h1>
 
 <div class="row mb-4">
-    <div class="col-md-3">
-        <div class="card text-white bg-primary">
+    <div class="col-md-3 d-flex">
+        <div class="card w-100" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white;">
             <div class="card-body">
-                <h6>Выручка сегодня</h6>
-                <h3>{{ revenue_today }} ₽</h3>
+                <h6 class="card-title">Выручка сегодня</h6>
+                <h3 class="card-text">{{ revenue_today }} ₽</h3>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-success">
+    <div class="col-md-3 d-flex">
+        <div class="card w-100" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
             <div class="card-body">
-                <h6>Выручка за неделю</h6>
-                <h3>{{ revenue_week }} ₽</h3>
+                <h6 class="card-title">Выручка за неделю</h6>
+                <h3 class="card-text">{{ revenue_week }} ₽</h3>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-info">
+    <div class="col-md-3 d-flex">
+        <div class="card w-100" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
             <div class="card-body">
-                <h6>Всего клиентов</h6>
-                <h3>{{ total_clients }}</h3>
+                <h6 class="card-title">Всего клиентов</h6>
+                <h3 class="card-text">{{ total_clients }}</h3>
                 <small>+{{ new_clients_week }} за неделю</small>
             </div>
         </div>
     </div>
-    <div class="col-md-3">
-        <div class="card text-white bg-secondary">
+    <div class="col-md-3 d-flex">
+        <div class="card w-100" style="background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); color: white;">
             <div class="card-body">
-                <h6>Средний чек</h6>
-                <h3>{{ avg_check }} ₽</h3>
+                <h6 class="card-title">Средний чек</h6>
+                <h3 class="card-text">{{ avg_check }} ₽</h3>
             </div>
         </div>
     </div>
 </div>
 
 <div class="row">
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 d-flex">
+        <div class="card w-100">
             <div class="card-header">
                 <h5>Топ услуг</h5>
             </div>
-            <div class="card-body">
-                <ul class="list-group">
-                {% for service, count in top_services %}
-                    <li class="list-group-item d-flex justify-content-between">
-                        {{ service }} <span class="badge bg-primary">{{ count }}</span>
-                    </li>
-                {% endfor %}
-                </ul>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                {% if top_services %}
+                    <ul class="list-group w-100">
+                    {% for service, count in top_services %}
+                        <li class="list-group-item d-flex justify-content-between">
+                            {{ service }} <span class="badge bg-primary">{{ count }}</span>
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted text-center mb-0">Нет выполненных услуг</p>
+                {% endif %}
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 d-flex">
+        <div class="card w-100">
             <div class="card-header">
                 <h5>Динамика выручки</h5>
             </div>
@@ -71,29 +75,33 @@
 </div>
 
 <div class="row mt-4">
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 d-flex">
+        <div class="card w-100">
             <div class="card-header">
                 <h5>Курс валют</h5>
             </div>
-            <div class="card-body">
-                <h4>USD: {{ usd_rate }} ₽</h4>
+            <div class="card-body d-flex align-items-center justify-content-center">
+                <h4 class="mb-0">USD: {{ usd_rate }} ₽</h4>
             </div>
         </div>
     </div>
-    <div class="col-md-6">
-        <div class="card">
+    <div class="col-md-6 d-flex">
+        <div class="card w-100">
             <div class="card-header">
                 <h5>Последние записи</h5>
             </div>
             <div class="card-body">
-                <ul class="list-group">
-                {% for app in recent_appointments %}
-                    <li class="list-group-item">
-                        {{ app.client.name }} - {{ app.service.name }} - {{ app.appointment_time.strftime('%d.%m %H:%M') }}
-                    </li>
-                {% endfor %}
-                </ul>
+                {% if recent_appointments %}
+                    <ul class="list-group">
+                    {% for app in recent_appointments %}
+                        <li class="list-group-item">
+                            {{ app.client.name }} - {{ app.service.name }} - {{ app.appointment_time.strftime('%d.%m %H:%M') }}
+                        </li>
+                    {% endfor %}
+                    </ul>
+                {% else %}
+                    <p class="text-muted text-center mb-0">Нет записей</p>
+                {% endif %}
             </div>
         </div>
     </div>
