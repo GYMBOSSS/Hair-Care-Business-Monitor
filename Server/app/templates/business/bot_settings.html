@@ -1,0 +1,98 @@
+{% extends "base.html" %}
+
+{% block title %}Настройки бота{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header">
+                <h3>🤖 Настройка Telegram/MAX бота</h3>
+            </div>
+            <div class="card-body">
+                <p class="text-muted">
+                    Чтобы подключить бота к вашей CRM, выполните несколько простых шагов:
+                </p>
+                
+                <ol class="mb-4">
+                    <li>Зарегистрируйте бота в <strong>Telegram</strong> (через @BotFather) или в <strong>MAX</strong></li>
+                    <li>Скопируйте полученный <strong>токен</strong></li>
+                    <li>Вставьте токен в поле ниже и нажмите "Сохранить"</li>
+                    <li>После сохранения скопируйте <strong>Webhook URL</strong> и укажите его в настройках вашего бота</li>
+                </ol>
+                
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="bot_token" class="form-label">Токен бота</label>
+                        <input type="text" class="form-control" id="bot_token" 
+                               name="bot_token" 
+                               value="{{ business.bot_token or '' }}"
+                               placeholder="Например: 1234567890:ABCdefGHIJKlmnoPQRstUVWXYZ">
+                        <small class="text-muted">Токен вы получаете при создании бота</small>
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">
+                        💾 Сохранить токен
+                    </button>
+                </form>
+                
+                {% if business.bot_token %}
+                <hr>
+                <div class="mt-4">
+                    <h5>🔗 Webhook URL для вашего бота</h5>
+                    <div class="input-group">
+                        <input type="text" class="form-control" id="webhook_url" 
+                               value="https://ваш-сервер.ru/webhook/{{ business.bot_token }}" 
+                               readonly>
+                        <button class="btn btn-outline-secondary" onclick="copyWebhook()">
+                            📋 Копировать
+                        </button>
+                    </div>
+                    <small class="text-muted">
+                        Вставьте этот URL в настройки вашего бота (Telegram: setWebhook, MAX: webhook)
+                    </small>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+        
+        <div class="card mt-4">
+            <div class="card-header">
+                <h5>📖 Инструкция: как получить токен</h5>
+            </div>
+            <div class="card-body">
+                <h6>Telegram:</h6>
+                <ol>
+                    <li>Найдите в Telegram бота <strong>@BotFather</strong></li>
+                    <li>Отправьте команду <code>/newbot</code></li>
+                    <li>Придумайте имя и username для бота</li>
+                    <li>Получите токен и вставьте его выше</li>
+                </ol>
+                
+                <h6 class="mt-3">MAX:</h6>
+                <ol>
+                    <li>Зарегистрируйтесь в <strong>MAX Business</strong></li>
+                    <li>Создайте нового бота в личном кабинете</li>
+                    <li>Скопируйте токен из настроек бота</li>
+                </ol>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function copyWebhook() {
+    const input = document.getElementById('webhook_url');
+    input.select();
+    document.execCommand('copy');
+    
+    // Показываем уведомление
+    const btn = event.target;
+    const originalText = btn.innerText;
+    btn.innerText = '✅ Скопировано!';
+    setTimeout(() => {
+        btn.innerText = originalText;
+    }, 2000);
+}
+</script>
+{% endblock %}

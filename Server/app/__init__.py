@@ -40,6 +40,12 @@ def create_app():
     from app.routes import auth_routes
     app.register_blueprint(auth_routes.auth_bp)
     
+    from app.routes import bot_routes
+    app.register_blueprint(bot_routes.bot_bp)
+    
+    from app.routes import api_routes
+    app.register_blueprint(api_routes.api_bp)
+    
     return app
 
 @login_manager.user_loader

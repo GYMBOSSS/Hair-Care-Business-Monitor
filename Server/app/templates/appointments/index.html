@@ -5,7 +5,14 @@
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-3">
     <h1>Записи</h1>
-    <a href="{{ url_for('appointments.create') }}" class="btn btn-primary">+ Новая запись</a>
+    <div>
+        <a href="{{ url_for('appointments.export') }}" class="btn btn-success me-2">
+            📥 Экспорт в CSV
+        </a>
+        <a href="{{ url_for('appointments.create') }}" class="btn btn-primary">
+            + Новая запись
+        </a>
+    </div>
 </div>
 
 <div class="table-responsive">

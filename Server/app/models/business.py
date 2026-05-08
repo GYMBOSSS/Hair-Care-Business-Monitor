@@ -16,5 +16,7 @@ class Business(db.Model):
     services = db.relationship('Service', backref='business', lazy=True)
     appointments = db.relationship('Appointment', backref='business', lazy=True)
     
+    bot_token = db.Column(db.String(200), unique = True, nullable = True)
+    
     def __repr__(self):
         return f'<Buisness {self.name}>'

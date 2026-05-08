@@ -15,24 +15,25 @@ def export():
     
     services = Service.query.filter_by(business_id=current_user.business_id).all()
     
-    output = []
-    output.append(['ID', 'Название', 'Цена', 'Длительность (мин)'])
+    import io
+    import csv
     
+    si = io.StringIO()
+    writer = csv.writer(si, delimiter=';')
+    
+    # Заголовки
+    writer.writerow(['ID', 'Название', 'Цена', 'Длительность (мин)'])
+    
+    # Данные
     for service in services:
-        output.append([
+        writer.writerow([
             service.id,
             service.name,
             service.price,
             service.duration_minutes
         ])
     
-    import io
-    import csv
-    si = io.StringIO()
-    writer = csv.writer(si)
-    writer.writerows(output)
-    
-    response = make_response(si.getvalue())
+    response = make_response(si.getvalue().encode('utf-8-sig'))
     response.headers['Content-Disposition'] = 'attachment; filename=services.csv'
     response.headers['Content-type'] = 'text/csv; charset=utf-8'
     

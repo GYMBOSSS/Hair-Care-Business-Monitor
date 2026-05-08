@@ -3,6 +3,7 @@ from app import db
 from app.models.client import Client
 from flask_login import login_required, current_user
 import csv
+import re
 
 clients_bp = Blueprint('clients', __name__)
 
@@ -44,10 +45,8 @@ def index():
         flash('Сначала привяжитесь к бизнесу', 'warning')
         return redirect(url_for('dashboard.index'))
     
-    clients = Client.query.all()
+    clients = Client.query.filter_by(business_id=current_user.business_id).all()
     return render_template('clients/index.html', clients=clients)
-
-#хуй
 
 @clients_bp.route('/clients/new', methods=['GET','POST'])
 @login_required
@@ -60,9 +59,29 @@ def create():
         name = request.form.get('name')
         phone = request.form.get('phone')
         comment = request.form.get('comment')
-        business_id = current_user.business_id
         
-        client = Client(name=name, phone=phone, comment=comment, business_id=business_id)
+        # Валидация телефона
+        is_valid, error_msg = validate_phone(phone)
+        if not is_valid:
+            flash(error_msg, 'danger')
+            return render_template('clients/form.html', name=name, phone=phone, comment=comment)
+        
+        # Проверка на дубликат в рамках бизнеса
+        existing = Client.query.filter_by(
+            phone=phone,
+            business_id=current_user.business_id
+        ).first()
+        
+        if existing:
+            flash(f'Клиент с номером {phone} уже существует в вашем бизнесе', 'danger')
+            return render_template('clients/form.html', name=name, phone=phone, comment=comment)
+        
+        client = Client(
+            name=name,
+            phone=phone,
+            comment=comment,
+            business_id=current_user.business_id
+        )
         db.session.add(client)
         db.session.commit()
         
@@ -84,9 +103,30 @@ def edit(id):
     ).first_or_404()
     
     if request.method == 'POST':
-        client.name = request.form.get('name')
-        client.phone = request.form.get('phone')
-        client.comment = request.form.get('comment')
+        name = request.form.get('name')
+        phone = request.form.get('phone')
+        comment = request.form.get('comment')
+        
+        # Валидация телефона
+        is_valid, error_msg = validate_phone(phone)
+        if not is_valid:
+            flash(error_msg, 'danger')
+            return render_template('clients/form.html', client=client)
+        
+        # Проверка на дубликат (исключая текущего клиента)
+        existing = Client.query.filter(
+            Client.phone == phone,
+            Client.business_id == current_user.business_id,
+            Client.id != id
+        ).first()
+        
+        if existing:
+            flash(f'Клиент с номером {phone} уже существует в вашем бизнесе', 'danger')
+            return render_template('clients/form.html', client=client)
+        
+        client.name = name
+        client.phone = phone
+        client.comment = comment
         
         db.session.commit()
         flash('Клиент обновлен', 'success')
@@ -110,3 +150,17 @@ def delete(id):
     db.session.commit()
     flash('Клиент удалён', 'success')
     return redirect(url_for('clients.index'))
+
+def validate_phone(phone):
+    # Убираем все нецифровые символы
+    digits = re.sub(r'\D', '', phone)
+    
+    # Проверяем длину (10 или 11 цифр)
+    if len(digits) not in [10, 11]:
+        return False, "Номер должен содержать 10 или 11 цифр"
+    
+    # Проверяем, что начинается с 7, 8 или +7
+    if len(digits) == 11 and digits[0] not in ['7', '8']:
+        return False, "Номер должен начинаться с 7 или 8"
+    
+    return True, None
