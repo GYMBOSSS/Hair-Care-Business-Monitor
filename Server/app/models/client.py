@@ -9,6 +9,7 @@ class Client(db.Model):
     phone = db.Column(db.String(20), unique=False, nullable=False)
     comment = db.Column(db.String(200), nullable=True)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    chat_id = db.Column(db.String(50), nullable = True)
     
     appointments = db.relationship('Appointment', backref='client', lazy=True)
     

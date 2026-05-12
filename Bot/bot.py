@@ -27,13 +27,16 @@ sessions = {}
 # ============================================================
 
 def extract_service_name(text: str, services: list) -> Optional[str]:
-    """Извлекает название услуги из текста"""
     text_lower = text.lower()
     
+    # Проверка на точное совпадение
     for service in services:
+        if service['name'].lower() == text_lower:
+            return service['name']
         if service['name'].lower() in text_lower:
             return service['name']
     
+    # Твои ключевые слова
     keywords = {
         'мойка': 'Мойка',
         'стрижка': 'Стрижка',
@@ -199,6 +202,44 @@ async def process_message(chat_id: int, text: str) -> str:
             "- «Мои записи»\n"
             "- «Отмени запись 123»"
         )
+        
+    if session.waiting_for == 'service':
+        services_data = await send_to_crm("/api/bot/services", {'token': business_token}, method='get')
+        services = services_data.get('services', [])
+        
+        # Ищем услугу по названию
+        selected = None
+        for s in services:
+            if s['name'].lower() == text_lower:
+                selected = s
+                break
+        
+        if selected:
+            session.service_id = selected['id']
+            session.service_name = selected['name']
+            session.waiting_for = 'date'  # следующий шаг — дата
+            return f"📅 Услуга: {selected['name']} — {selected['price']} ₽\n\nУточните дату записи (например, «завтра»)."
+        else:
+            services_list = "\n".join([f"• {s['name']} — {s['price']} ₽" for s in services[:5]])
+            return f"🔍 Не понял. Выберите услугу:\n\n{services_list}"
+    
+    if session.waiting_for == 'date':
+        appointment_date = extract_date(text)
+        if appointment_date:
+            session.appointment_date = appointment_date
+            session.waiting_for = 'time'
+            return f"📅 Дата: {appointment_date.strftime('%d.%m.%Y')}\n\nУточните время (например, «в 15:00»)."
+        else:
+            return "📅 Не понял дату. Напишите «завтра», «понедельник» или «25.05»."
+
+    if session.waiting_for == 'time':
+        appointment_time = extract_time(text)
+        if appointment_time:
+            session.appointment_time = appointment_time
+            session.waiting_for = 'name_and_phone'
+            return f"⏰ Время: {appointment_time.strftime('%H:%M')}\n\n📝 Теперь укажите ваше имя и телефон для записи.\nНапример: «Иван Петров, +79991234567»"
+        else:
+            return "⏰ Не понял время. Напишите «в 15:00» или «15:00»."
     
     if session.waiting_for == 'name_and_phone':
         phone = extract_phone(text)
@@ -262,6 +303,9 @@ async def handle_booking_start(business_token: str, chat_id: int, text: str) -> 
     services_data = await send_to_crm("/api/bot/services", {'token': business_token}, method='get')
     services = services_data.get('services', [])
     
+    logger.info(f"Services from CRM: {services}")
+    logger.info(f"Looking for service in: {text}")
+    
     if not services:
         return "❌ Услуги пока не добавлены. Обратитесь к администратору."
     
@@ -269,6 +313,9 @@ async def handle_booking_start(business_token: str, chat_id: int, text: str) -> 
     
     if not service_name:
         services_list = "\n".join([f"• {s['name']} — {s['price']} ₽" for s in services[:5]])
+        session = sessions.get(chat_id, UserSession())
+        session.waiting_for = 'service'
+        sessions[chat_id] = session
         return f"🔍 Какую услугу вы хотите?\n\nДоступные услуги:\n{services_list}"
     
     service = next((s for s in services if s['name'].lower() == service_name.lower()), None)
@@ -418,19 +465,15 @@ async def webhook_handler(request):
         # Обрабатываем сообщение
         reply = await process_message(chat_id, text)
         
-        # Отправляем ответ через эмулятор MAX
-        async with ClientSession() as session:
-            await session.post(f"http://localhost:9000/bot{BOT_TOKEN}/sendMessage", json={
-                'chat_id': chat_id,
-                'text': reply
-            })
-        
-        return web.Response(text='OK', status=200)
+        # Возвращаем ответ прямо в запросе (синхронно)
+        return web.json_response({'reply': reply})
         
     except Exception as e:
         logger.error(f"Ошибка в webhook: {e}")
-        return web.Response(text='Error', status=500)
+        return web.json_response({'error': str(e)}, status=500)
 
+async def health_check(request):
+    return web.Response(text='OK', status=200)
 
 # ============================================================
 # ЗАПУСК WEB-СЕРВЕРА БОТА
@@ -438,7 +481,9 @@ async def webhook_handler(request):
 
 app = web.Application()
 app.router.add_post('/webhook/{token}', webhook_handler)
+app.router.add_get('/', health_check)
 
 if __name__ == '__main__':
     logger.info(f"Бот запущен на порту {PORT}")
     web.run_app(app, port=PORT)
+    

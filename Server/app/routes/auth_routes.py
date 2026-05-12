@@ -68,6 +68,16 @@ def register():
         
     return render_template('auth/register.html')
 
+import re
+
+def validate_phone(phone):
+    digits = re.sub(r'\D', '', phone)
+    if len(digits) not in [10, 11]:
+        return False, "Номер телефона должен содержать 10 или 11 цифр"
+    if len(digits) == 11 and digits[0] not in ['7', '8']:
+        return False, "Номер должен начинаться с 7 или 8"
+    return True, None
+
 @auth_bp.route('/create-business', methods=['GET', 'POST'])
 @login_required
 def create_business():
@@ -85,6 +95,12 @@ def create_business():
         phone = request.form.get('phone')
         description = request.form.get('description')
         
+        # Валидация телефона
+        is_valid, error_msg = validate_phone(phone)
+        if not is_valid:
+            flash(error_msg, 'danger')
+            return render_template('auth/create_business.html')
+        
         business = Business(
             name=name,
             address=address,
@@ -93,7 +109,7 @@ def create_business():
         )
         
         db.session.add(business)
-        db.session.flush() 
+        db.session.flush()
         
         current_user.business_id = business.id
         db.session.commit()
@@ -205,3 +221,20 @@ def logout():
     logout_user()
     flash('Вы вышли из системы', 'info')
     return redirect(url_for('auth.login'))
+
+def validate_phone(phone):
+    if not phone:
+        return True, None  # пустое поле — ок (необязательно)
+    
+    # Убираем все нецифровые символы
+    digits = re.sub(r'\D', '', phone)
+    
+    # Проверяем длину (10 или 11 цифр)
+    if len(digits) not in [10, 11]:
+        return False, "Номер телефона должен содержать 10 или 11 цифр"
+    
+    # Проверяем, что начинается с 7 или 8 (для российских номеров)
+    if len(digits) == 11 and digits[0] not in ['7', '8']:
+        return False, "Номер должен начинаться с 7 или 8"
+    
+    return True, None
